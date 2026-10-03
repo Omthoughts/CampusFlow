@@ -11,6 +11,7 @@ import DeadlinesList from '../features/deadlines/DeadlinesList';
 import AdminLayout from '../features/admin/AdminLayout';
 import AdminDashboard from '../features/admin/AdminDashboard';
 import NoticeUpload from '../features/admin/NoticeUpload';
+import AdminNoticeManagement from '../features/admin/AdminNoticeManagement';
 import NoticeReview from '../features/admin/NoticeReview';
 
 export const router = createBrowserRouter([
@@ -27,6 +28,10 @@ export const router = createBrowserRouter([
         element: <AdminDashboard />,
       },
       {
+        path: 'notices',
+        element: <AdminNoticeManagement />,
+      },
+      {
         path: 'notices/upload',
         element: <NoticeUpload />,
       },
@@ -37,8 +42,8 @@ export const router = createBrowserRouter([
       {
         path: '',
         element: <Navigate to="/admin/dashboard" replace />,
-      }
-    ]
+      },
+    ],
   },
   {
     path: '/',
@@ -70,12 +75,12 @@ export const router = createBrowserRouter([
       },
       {
         path: 'calendar',
-        element: <EventsList />, // Reusing EventsList for calendar tab for MVP
+        element: <EventsList />,
       },
       {
         path: '',
         element: <Navigate to="/dashboard" replace />,
-      }
+      },
     ],
   },
 ]);
