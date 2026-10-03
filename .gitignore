@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env.*
+!.env.example
+
+# Build Outputs
+dist/
+build/
+.next/
+
+# Data and PII
+sources doc/
+*.csv
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Databases
+*.sqlite
+*.sqlite-journal
+*.db
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+
+# Testing scratch files
+*-test.ts
+*-test.js
+backend/test-notice*.pdf
+generate-pdf.js
+get-id.ts
+seed-dummy.ts
+
+# MCP logs/artifacts
+.system_generated/
+scratch/
+brain/

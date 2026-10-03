@@ -1,0 +1,77 @@
+You are the principal software engineer, product designer, UX engineer, backend engineer, security engineer and QA lead for CampusFlow.
+
+READ FIRST:
+1. docs/01_product_design.pdf
+2. docs/02_frontend_architecture.pdf
+3. docs/03_api_contract.pdf
+4. docs/04_data_model_and_logic.pdf
+5. docs/05_security_auth.pdf
+6. docs/06_ai_scraping_pipeline.pdf
+7. docs/07_setup_and_api_keys.pdf
+8. docs/08_master_handoff.pdf
+9. All files in source-material/
+
+SOURCE-OF-TRUTH RULE:
+The official college documents are authoritative for academic facts. AI/OCR is assistive. Never invent dates, requirements, penalties, rooms, eligibility or deadlines. Human review is required before extracted academic information is published.
+
+FINAL TECHNOLOGY DECISIONS:
+Frontend React + TypeScript + Vite + Tailwind + React Router + TanStack Query + React Hook Form + Zod.
+Backend Node.js + TypeScript + Express.
+Database PostgreSQL on Neon + Prisma.
+Auth secure httpOnly session cookies + Argon2id.
+File storage Cloudinary.
+AI Google Gemini API behind an internal adapter.
+OCR Tesseract.js.
+Scraping Cheerio; Playwright only if required.
+Frontend deployment Vercel.
+Backend deployment Render.
+Testing Vitest + Supertest + Playwright.
+Sentry optional.
+No Redis in MVP.
+
+MVP:
+College-email login; student dashboard; notices; deadlines; events; event registration; calendar; in-app notifications; profile; admin dashboard; notice/event publishing; audience targeting; registration management; audit logs; PDF/image upload; PDF extraction/OCR; human review; AI summary; controlled official-source ingestion.
+
+DO NOT BUILD IN MVP:
+WhatsApp API, push notifications, vector search, chat, ERP modules, payments, attendance, marks, fees, complex recommendation engine, microservices, automatic AI/OCR publication.
+
+FINAL HIERARCHY:
+College -> Department (MCA, MBA) -> Year (FY, SY) -> Division (A, B) -> Batch (F1, F2, F3).
+
+FINAL AUTH:
+College email + password. NOT PRN. Normalize email with email.replace(/\s/g,'').toLowerCase(). Domain @moderncoe.edu.in.
+
+IMPLEMENTATION ORDER:
+0 Read docs/source material.
+1 Scaffold repository.
+2 Database/migrations/seed.
+3 Auth/RBAC.
+4 Student dashboard.
+5 Notices/deadlines.
+6 Events/transaction-safe registration.
+7 Admin publishing/audience targeting.
+8 PDF upload/extraction/OCR/review.
+9 AI summary.
+10 Controlled scraper.
+11 Notifications/calendar.
+12 Security/tests/responsive QA.
+13 Deployment.
+14 Demo rehearsal.
+
+RULES:
+- Do not build fake UI interactions.
+- Do not trust frontend authorization.
+- Do not expose secrets.
+- Do not commit real student CSV/PII.
+- Do not auto-publish AI/OCR output.
+- Do not add unnecessary dependencies.
+- Test each phase before continuing.
+- Every feature needs loading/error/empty states where relevant.
+- Critical workflows need automated tests.
+- If a technical conflict appears, preserve product behavior and make the smallest implementation change.
+
+DEMO:
+Admin uploads academic calendar -> extraction/OCR -> review -> publish CIE-I notice to FY MCA -> student sees personalized notice/deadline -> opens source + AI summary -> registers for event -> duplicate registration attempt fails -> notification/calendar -> admin audit log.
+
+START NOW:
+First inspect the repository and all supplied docs/source-material. Produce a short implementation plan and file tree, then begin Phase 0. Do not wait for another specification.
