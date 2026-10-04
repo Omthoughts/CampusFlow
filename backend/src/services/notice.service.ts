@@ -1,6 +1,5 @@
 import { prisma } from '../config/prisma';
 import { AppError } from '../utils/errors';
-import { AuditService } from './audit.service';
 
 interface PublishNoticeParams {
   noticeId: string;
@@ -20,21 +19,18 @@ export class NoticeService {
       if (!notice) {
         throw new AppError('Notice not found', 404);
       }
-      
-      if (notice.status === 'PUBLISHED') {
-        throw new AppError('Notice is already published', 400);
-      }
 
-      // Update notice state
+      // Update notice state to PUBLISHED
       const updatedNotice = await tx.notice.update({
         where: { id: noticeId },
         data: {
           status: 'PUBLISHED',
-          publishedAt: new Date(),
+          publishedAt: notice.publishedAt || new Date(),
         }
       });
 
-      // Create Audience Targeting
+      // Clear existing audiences for this notice and create new targeting rule
+      await tx.noticeAudience.deleteMany({ where: { noticeId } });
       await tx.noticeAudience.create({
         data: {
           noticeId,

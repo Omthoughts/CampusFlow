@@ -41,5 +41,10 @@ seed-dummy.ts
 
 # MCP logs/artifacts
 .system_generated/
+.playwright-mcp/
 scratch/
 brain/
+
+# Uploaded files
+backend/uploads/*
+!backend/uploads/.gitkeep

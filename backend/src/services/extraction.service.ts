@@ -17,14 +17,37 @@ export class ExtractionService {
 
         // If the extracted text is suspiciously short for a document, it might be a scanned PDF
         if (extractedText.length < 50) {
-          console.log('PDF text extraction yielded little text. Falling back to OCR...');
-          extractedText = await this.runOCRForPDF(buffer);
+          console.log('PDF text extraction yielded little text. Attempting OCR with safety timeout...');
+          try {
+            const timeoutPromise = new Promise<string>((_, reject) => 
+              setTimeout(() => reject(new Error('OCR Timeout')), 4000)
+            );
+            const ocrResult = await Promise.race([
+              this.runOCRForPDF(buffer),
+              timeoutPromise
+            ]);
+            if (ocrResult && ocrResult.length > extractedText.length) {
+              extractedText = ocrResult;
+            }
+          } catch (ocrErr) {
+            console.warn('OCR skipped or timed out, continuing with text parser.');
+          }
         }
 
         return extractedText;
       } catch (error) {
-        console.error('pdf-parse failed, falling back to OCR', error);
-        return await this.runOCRForPDF(buffer);
+        console.error('pdf-parse failed, attempting OCR fallback', error);
+        try {
+          const timeoutPromise = new Promise<string>((_, reject) => 
+            setTimeout(() => reject(new Error('OCR Timeout')), 4000)
+          );
+          return await Promise.race([
+            this.runOCRForPDF(buffer),
+            timeoutPromise
+          ]);
+        } catch {
+          return '';
+        }
       }
     } else {
       return '';

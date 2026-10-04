@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Environment Variables & Secrets (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+
+# Local uploads
+uploads/*
+!uploads/.gitkeep
+
+# Logs
+*.log

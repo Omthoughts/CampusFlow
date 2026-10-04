@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { useAuthStore } from '../../lib/auth';
@@ -20,13 +20,21 @@ export default function Login() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'omkar_mankar_mca@moderncoe.edu.in',
+      password: 'Pesmodern#123',
+    },
   });
 
   const mutation = useMutation({
     mutationFn: (data: LoginForm) => api.post('/auth/login', data).then(res => res.data),
     onSuccess: (data) => {
       login(data.user);
-      navigate('/dashboard', { replace: true });
+      if (data.user.role === 'ADMIN' || data.user.role === 'FACULTY') {
+        navigate('/admin/dashboard', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     },
   });
 
@@ -127,7 +135,16 @@ export default function Login() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-500 font-medium mt-8">
+          <div className="pt-4 border-t border-slate-100 text-center space-y-2">
+            <p className="text-xs text-slate-500">
+              College Faculty or Administrator?{' '}
+              <Link to="/admin/login" className="text-primary font-bold hover:underline">
+                Sign in to Admin Portal &rarr;
+              </Link>
+            </p>
+          </div>
+
+          <p className="text-center text-sm text-slate-500 font-medium mt-4">
             Having trouble logging in? <a href="#" className="text-primary hover:underline hover:text-[#4338CA] transition-colors">Contact administration</a>
           </p>
         </div>

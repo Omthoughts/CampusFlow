@@ -56,6 +56,28 @@ async function main() {
     },
   });
 
+  // Create Omkar Mankar
+  const omkarPasswordHash = await argon2.hash('Pesmodern#123');
+  await prisma.user.upsert({
+    where: { email: 'omkar_mankar_mca@moderncoe.edu.in' },
+    update: {
+      passwordHash: omkarPasswordHash,
+      status: UserStatus.ACTIVE,
+    },
+    create: {
+      name: 'Omkar Mankar',
+      email: 'omkar_mankar_mca@moderncoe.edu.in',
+      passwordHash: omkarPasswordHash,
+      role: Role.STUDENT,
+      departmentId: mca.id,
+      year: Year.FY,
+      division: Division.A,
+      batch: Batch.F1,
+      mustChangePassword: false,
+      status: UserStatus.ACTIVE,
+    },
+  });
+
   // Create Students
   const students = [
     { email: 'student_f1_01@moderncoe.edu.in', name: 'Student F1 01', batch: Batch.F1 },

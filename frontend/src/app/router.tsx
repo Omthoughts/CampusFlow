@@ -12,19 +12,42 @@ import AdminLayout from '../features/admin/AdminLayout';
 import AdminDashboard from '../features/admin/AdminDashboard';
 import NoticeUpload from '../features/admin/NoticeUpload';
 import NoticeReview from '../features/admin/NoticeReview';
+import AdminNoticesList from '../features/admin/AdminNoticesList';
+import AdminEventsList from '../features/admin/AdminEventsList';
+import AdminAuditLogs from '../features/admin/AdminAuditLogs';
+import AdminLogin from '../features/admin/AdminLogin';
+import CalendarView from '../features/calendar/CalendarView';
+import ErrorBoundary from '../components/common/ErrorBoundary';
+
+import RoleGuard from '../components/common/RoleGuard';
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/admin/login',
+    element: <AdminLogin />,
+    errorElement: <ErrorBoundary />,
   },
   {
     path: '/admin',
-    element: <AdminLayout />,
+    element: (
+      <RoleGuard allowedRoles={['ADMIN', 'FACULTY']} fallbackPath="/dashboard">
+        <AdminLayout />
+      </RoleGuard>
+    ),
+    errorElement: <ErrorBoundary />,
     children: [
       {
         path: 'dashboard',
         element: <AdminDashboard />,
+      },
+      {
+        path: 'notices',
+        element: <AdminNoticesList />,
       },
       {
         path: 'notices/upload',
@@ -35,6 +58,18 @@ export const router = createBrowserRouter([
         element: <NoticeReview />,
       },
       {
+        path: 'events',
+        element: <AdminEventsList />,
+      },
+      {
+        path: 'audit',
+        element: (
+          <RoleGuard allowedRoles={['ADMIN']} fallbackPath="/admin/dashboard">
+            <AdminAuditLogs />
+          </RoleGuard>
+        ),
+      },
+      {
         path: '',
         element: <Navigate to="/admin/dashboard" replace />,
       }
@@ -43,6 +78,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
+    errorElement: <ErrorBoundary />,
     children: [
       {
         path: 'dashboard',
@@ -70,7 +106,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'calendar',
-        element: <EventsList />, // Reusing EventsList for calendar tab for MVP
+        element: <CalendarView />,
       },
       {
         path: '',
@@ -78,4 +114,8 @@ export const router = createBrowserRouter([
       }
     ],
   },
+  {
+    path: '*',
+    element: <ErrorBoundary />,
+  }
 ]);

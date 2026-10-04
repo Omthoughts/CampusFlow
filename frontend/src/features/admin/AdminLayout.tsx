@@ -6,7 +6,8 @@ import {
   FileText, 
   List,
   LogOut,
-  ChevronLeft
+  ChevronLeft,
+  Shield
 } from 'lucide-react';
 import { api } from '../../lib/api';
 
@@ -15,7 +16,7 @@ export default function AdminLayout() {
   const location = useLocation();
 
   if (!isAuthenticated || !user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   // Client-side protection (backend enforces real protection)
@@ -35,6 +36,7 @@ export default function AdminLayout() {
     { name: 'Upload Notice', href: '/admin/notices/upload', icon: Upload },
     { name: 'Manage Notices', href: '/admin/notices', icon: FileText },
     { name: 'Manage Events', href: '/admin/events', icon: List },
+    { name: 'Audit Logs', href: '/admin/audit', icon: Shield },
   ];
 
   return (
