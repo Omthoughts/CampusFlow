@@ -6,6 +6,7 @@ import NoticesList from '../features/notices/NoticesList';
 import NoticeDetail from '../features/notices/NoticeDetail';
 import EventsList from '../features/events/EventsList';
 import EventDetail from '../features/events/EventDetail';
+import ReviewQueue from '../features/admin/ReviewQueue';
 import DeadlinesList from '../features/deadlines/DeadlinesList';
 
 import AdminLayout from '../features/admin/AdminLayout';
@@ -38,6 +39,10 @@ export const router = createBrowserRouter([
       {
         path: 'notices/:id/review',
         element: <NoticeReview />,
+      },
+      {
+        path: 'reviews',
+        element: <ReviewQueue />,
       },
       {
         path: '',

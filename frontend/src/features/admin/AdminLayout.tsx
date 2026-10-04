@@ -1,10 +1,11 @@
 import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../lib/auth';
-import { 
-  Settings, 
-  Upload, 
-  FileText, 
+import {
+  Settings,
+  Upload,
+  FileText,
   List,
+  ClipboardCheck,
   LogOut,
   ChevronLeft
 } from 'lucide-react';
@@ -34,6 +35,7 @@ export default function AdminLayout() {
     { name: 'Dashboard', href: '/admin/dashboard', icon: Settings },
     { name: 'Upload Notice', href: '/admin/notices/upload', icon: Upload },
     { name: 'Manage Notices', href: '/admin/notices', icon: FileText },
+    { name: 'Review Queue', href: '/admin/reviews', icon: ClipboardCheck },
     { name: 'Manage Events', href: '/admin/events', icon: List },
   ];
 
@@ -49,18 +51,23 @@ export default function AdminLayout() {
         <div className="flex-1 py-6 px-4 space-y-2">
           {navItems.map((item) => {
             const isActive = location.pathname.startsWith(item.href);
+
             return (
               <Link
                 key={item.name}
                 to={item.href}
                 className={`
                   flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all duration-200
-                  ${isActive 
-                    ? 'bg-primary text-white shadow-md' 
+                  ${isActive
+                    ? 'bg-primary text-white shadow-md'
                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'}
                 `}
               >
-                <item.icon className={`h-5 w-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                <item.icon
+                  className={`h-5 w-5 ${
+                    isActive ? 'text-white' : 'text-slate-400'
+                  }`}
+                />
                 <span>{item.name}</span>
               </Link>
             );
@@ -68,16 +75,26 @@ export default function AdminLayout() {
         </div>
 
         <div className="p-4 border-t border-slate-800 space-y-4">
-          <Link to="/dashboard" className="flex items-center space-x-2 text-slate-400 hover:text-white text-sm px-4">
+          <Link
+            to="/dashboard"
+            className="flex items-center space-x-2 text-slate-400 hover:text-white text-sm px-4"
+          >
             <ChevronLeft className="h-4 w-4" />
             <span>Back to Student View</span>
           </Link>
+
           <div className="flex items-center space-x-3 px-4 py-2">
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold truncate">{user.name}</p>
-              <p className="text-xs text-slate-400 truncate capitalize">{user.role}</p>
+              <p className="text-xs text-slate-400 truncate capitalize">
+                {user.role}
+              </p>
             </div>
-            <button onClick={handleLogout} className="text-slate-400 hover:text-red-400">
+
+            <button
+              onClick={handleLogout}
+              className="text-slate-400 hover:text-red-400"
+            >
               <LogOut className="h-5 w-5" />
             </button>
           </div>
