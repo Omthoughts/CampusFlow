@@ -6,11 +6,13 @@ import NoticesList from '../features/notices/NoticesList';
 import NoticeDetail from '../features/notices/NoticeDetail';
 import EventsList from '../features/events/EventsList';
 import EventDetail from '../features/events/EventDetail';
+import ReviewQueue from '../features/admin/ReviewQueue';
 import DeadlinesList from '../features/deadlines/DeadlinesList';
 
 import AdminLayout from '../features/admin/AdminLayout';
 import AdminDashboard from '../features/admin/AdminDashboard';
 import NoticeUpload from '../features/admin/NoticeUpload';
+import AdminNoticeManagement from '../features/admin/AdminNoticeManagement';
 import NoticeReview from '../features/admin/NoticeReview';
 
 export const router = createBrowserRouter([
@@ -27,6 +29,10 @@ export const router = createBrowserRouter([
         element: <AdminDashboard />,
       },
       {
+        path: 'notices',
+        element: <AdminNoticeManagement />,
+      },
+      {
         path: 'notices/upload',
         element: <NoticeUpload />,
       },
@@ -35,10 +41,14 @@ export const router = createBrowserRouter([
         element: <NoticeReview />,
       },
       {
+        path: 'reviews',
+        element: <ReviewQueue />,
+      },
+      {
         path: '',
         element: <Navigate to="/admin/dashboard" replace />,
-      }
-    ]
+      },
+    ],
   },
   {
     path: '/',
@@ -70,12 +80,12 @@ export const router = createBrowserRouter([
       },
       {
         path: 'calendar',
-        element: <EventsList />, // Reusing EventsList for calendar tab for MVP
+        element: <EventsList />,
       },
       {
         path: '',
         element: <Navigate to="/dashboard" replace />,
-      }
+      },
     ],
   },
 ]);
