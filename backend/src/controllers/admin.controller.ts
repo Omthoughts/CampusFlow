@@ -7,6 +7,8 @@ import { NoticeService } from '../services/notice.service';
 import { sharedStore, SharedNotice } from '../services/store.service';
 import { prisma } from '../config/prisma';
 import { AppError } from '../utils/errors';
+import * as argon2 from 'argon2';
+import { z } from 'zod';
 
 function parseSafeDate(d: any): Date | null {
   if (!d) return null;
@@ -649,4 +651,118 @@ export class AdminController {
       next(error);
     }
   }
+  static async getStudents(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const students = await prisma.user.findMany({
+        where: { role: 'STUDENT' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          studentId: true,
+          course: true,
+          year: true,
+          division: true,
+          batch: true,
+          rollNumber: true,
+          status: true,
+          createdAt: true,
+          department: {
+            select: { name: true, code: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      });
+      res.status(200).json({ success: true, data: students });
+    } catch (error: any) {
+      if (error?.name === 'PrismaClientInitializationError' || error?.message?.includes("Can't reach database")) {
+        return next(new AppError('Database is unavailable. Student records cannot be retrieved without PostgreSQL.', 503));
+      }
+      return next(error);
+    }
+  }
+
+  static async createStudent(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const schema = z.object({
+        name: z.string().min(2),
+        email: z.string().email(),
+        password: z.string().min(8),
+        studentId: z.string().min(1),
+        departmentId: z.string().optional().nullable(),
+        course: z.string().optional().nullable(),
+        year: z.enum(['FY', 'SY']).optional().nullable(),
+        division: z.enum(['A', 'B']).optional().nullable(),
+        rollNumber: z.string().optional().nullable(),
+      });
+
+      const validated = schema.safeParse(req.body);
+      if (!validated.success) {
+        throw new AppError('Invalid student data', 400, 'VALIDATION_ERROR');
+      }
+
+      const data = validated.data;
+
+      try {
+        // Check for duplicates
+        const existingEmail = await prisma.user.findUnique({ where: { email: data.email } });
+        if (existingEmail) {
+          throw new AppError('Email/User ID is already registered', 400);
+        }
+
+        const existingStudentId = await prisma.user.findUnique({ where: { studentId: data.studentId } });
+        if (existingStudentId) {
+          throw new AppError('Student ID is already registered', 400);
+        }
+
+        const passwordHash = await argon2.hash(data.password);
+
+        const newStudent = await prisma.user.create({
+          data: {
+            name: data.name,
+            email: data.email,
+            passwordHash,
+            role: 'STUDENT',
+            studentId: data.studentId,
+            departmentId: data.departmentId || null,
+            course: data.course || null,
+            year: data.year as any || null,
+            division: data.division as any || null,
+            rollNumber: data.rollNumber || null,
+            mustChangePassword: true,
+            status: 'ACTIVE',
+          }
+        });
+
+        await prisma.auditLog.create({
+          data: {
+            actorId: req.user.id,
+            action: 'CREATE_STUDENT',
+            entityType: 'User',
+            entityId: newStudent.id,
+            metadata: { email: newStudent.email, studentId: newStudent.studentId }
+          }
+        });
+
+        res.status(201).json({
+          success: true,
+          data: {
+            id: newStudent.id,
+            name: newStudent.name,
+            email: newStudent.email,
+            studentId: newStudent.studentId
+          }
+        });
+      } catch (error: any) {
+        if (error instanceof AppError) throw error;
+        if (error?.name === 'PrismaClientInitializationError' || error?.message?.includes("Can't reach database")) {
+          throw new AppError('Database is unavailable. Actual student account must be persisted in PostgreSQL. In-memory fallback is disabled for account creation.', 503);
+        }
+        throw error;
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+

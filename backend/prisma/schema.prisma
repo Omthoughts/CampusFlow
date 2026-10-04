@@ -7,6 +7,153 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Department {
+  id    String @id @default(uuid())
+  name  String
+  code  String @unique
+  users User[]
+}
+
+model User {
+  id                 String         @id @default(uuid())
+  name               String
+  email              String         @unique
+  passwordHash       String
+  role               Role           @default(STUDENT)
+  status             UserStatus     @default(ACTIVE)
+  mustChangePassword Boolean        @default(true)
+  departmentId       String?
+  year               Year?
+  division           Division?
+  batch              Batch?
+  studentId          String?        @unique
+  course             String?
+  rollNumber         String?
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  auditLogs          AuditLog[]
+  deadlines          Deadline[]
+  events             Event[]
+  notices            Notice[]
+  notifications      Notification[]
+  registrations      Registration[]
+  department         Department?    @relation(fields: [departmentId], references: [id])
+}
+
+model Notice {
+  id              String           @id @default(uuid())
+  title           String
+  content         String
+  category        NoticeCategory
+  priority        NoticePriority   @default(NORMAL)
+  status          NoticeStatus     @default(DRAFT)
+  publishedAt     DateTime?
+  authorId        String
+  sourceUrl       String?
+  rawFileHash     String?          @unique
+  isAiGenerated   Boolean          @default(false)
+  isHumanVerified Boolean          @default(false)
+  attachments     Attachment[]
+  author          User             @relation(fields: [authorId], references: [id])
+  audiences       NoticeAudience[]
+  summary         NoticeSummary?
+}
+
+model NoticeAudience {
+  id           String    @id @default(uuid())
+  noticeId     String
+  departmentId String?
+  year         Year?
+  division     Division?
+  batch        Batch?
+  notice       Notice    @relation(fields: [noticeId], references: [id])
+
+  @@unique([noticeId, departmentId, year, division, batch])
+}
+
+model NoticeSummary {
+  noticeId       String    @id
+  whatChanged    String
+  whoAffected    String
+  requiredAction String?
+  deadline       DateTime?
+  rawAIResponse  Json?
+  evidence       Json?
+  sourcePages    String?
+  notice         Notice    @relation(fields: [noticeId], references: [id])
+}
+
+model Event {
+  id                   String         @id @default(uuid())
+  title                String
+  description          String
+  date                 DateTime
+  venue                String
+  capacity             Int?
+  registrationDeadline DateTime?
+  status               EventStatus    @default(DRAFT)
+  createdById          String
+  createdBy            User           @relation(fields: [createdById], references: [id])
+  registrations        Registration[]
+}
+
+model Registration {
+  id           String             @id @default(uuid())
+  eventId      String
+  userId       String
+  status       RegistrationStatus @default(CONFIRMED)
+  registeredAt DateTime           @default(now())
+  event        Event              @relation(fields: [eventId], references: [id])
+  user         User               @relation(fields: [userId], references: [id])
+
+  @@unique([eventId, userId])
+}
+
+model Deadline {
+  id                     String       @id @default(uuid())
+  title                  String
+  description            String?
+  dueAt                  DateTime
+  type                   DeadlineType
+  subject                String?
+  status                 NoticeStatus @default(PUBLISHED)
+  createdById            String
+  academicItemIdentifier String?
+  createdBy              User         @relation(fields: [createdById], references: [id])
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model Attachment {
+  id         String @id @default(uuid())
+  storageKey String
+  filename   String
+  mimeType   String
+  size       Int
+  noticeId   String
+  notice     Notice @relation(fields: [noticeId], references: [id])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  action     String
+  entityType String
+  entityId   String
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  actor      User     @relation(fields: [actorId], references: [id])
+}
+
 enum Role {
   STUDENT
   FACULTY
@@ -67,146 +214,4 @@ enum RegistrationStatus {
 enum DeadlineType {
   EXAM
   SUBMISSION
-}
-
-model Department {
-  id    String @id @default(uuid())
-  name  String
-  code  String @unique
-  users User[]
-}
-
-model User {
-  id                 String         @id @default(uuid())
-  name               String
-  email              String         @unique
-  passwordHash       String
-  role               Role           @default(STUDENT)
-  status             UserStatus     @default(ACTIVE)
-  mustChangePassword Boolean        @default(true)
-  departmentId       String?
-  department         Department?    @relation(fields: [departmentId], references: [id])
-  year               Year?
-  division           Division?
-  batch              Batch?
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @updatedAt
-  registrations      Registration[]
-  notices            Notice[]
-  events             Event[]
-  deadlines          Deadline[]
-  notifications      Notification[]
-  auditLogs          AuditLog[]
-}
-
-model Notice {
-  id          String           @id @default(uuid())
-  title       String
-  content     String
-  category    NoticeCategory
-  priority    NoticePriority   @default(NORMAL)
-  status      NoticeStatus     @default(DRAFT)
-  publishedAt DateTime?
-  authorId    String
-  author      User             @relation(fields: [authorId], references: [id])
-  sourceUrl   String?
-  rawFileHash String?          @unique
-  audiences   NoticeAudience[]
-  summary     NoticeSummary?
-  attachments Attachment[]
-}
-
-model NoticeAudience {
-  id           String      @id @default(uuid())
-  noticeId     String
-  notice       Notice      @relation(fields: [noticeId], references: [id])
-  departmentId String?
-  year         Year?
-  division     Division?
-  batch        Batch?
-
-  // We can uniquely identify an audience rule for a notice by these constraints.
-  // Prisma requires unique constraint for all nullable fields to have a specific behavior,
-  // but it's acceptable for logic.
-  @@unique([noticeId, departmentId, year, division, batch])
-}
-
-model NoticeSummary {
-  noticeId       String    @id
-  notice         Notice    @relation(fields: [noticeId], references: [id])
-  whatChanged    String
-  whoAffected    String
-  requiredAction String?
-  deadline       DateTime?
-  rawAIResponse  Json?
-}
-
-model Event {
-  id                   String         @id @default(uuid())
-  title                String
-  description          String
-  date                 DateTime
-  venue                String
-  capacity             Int?
-  registrationDeadline DateTime?
-  status               EventStatus    @default(DRAFT)
-  createdById          String
-  createdBy            User           @relation(fields: [createdById], references: [id])
-  registrations        Registration[]
-}
-
-model Registration {
-  id           String             @id @default(uuid())
-  eventId      String
-  event        Event              @relation(fields: [eventId], references: [id])
-  userId       String
-  user         User               @relation(fields: [userId], references: [id])
-  status       RegistrationStatus @default(CONFIRMED)
-  registeredAt DateTime           @default(now())
-
-  @@unique([eventId, userId])
-}
-
-model Deadline {
-  id          String       @id @default(uuid())
-  title       String
-  description String?
-  dueAt       DateTime
-  type        DeadlineType
-  subject     String?
-  status      NoticeStatus @default(PUBLISHED)
-  createdById String
-  createdBy   User         @relation(fields: [createdById], references: [id])
-}
-
-model Notification {
-  id        String    @id @default(uuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id])
-  type      String
-  title     String
-  body      String
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
-}
-
-model Attachment {
-  id         String @id @default(uuid())
-  storageKey String
-  filename   String
-  mimeType   String
-  size       Int
-  noticeId   String
-  notice     Notice @relation(fields: [noticeId], references: [id])
-}
-
-model AuditLog {
-  id         String   @id @default(uuid())
-  actorId    String
-  actor      User     @relation(fields: [actorId], references: [id])
-  action     String
-  entityType String
-  entityId   String
-  metadata   Json?
-  createdAt  DateTime @default(now())
 }

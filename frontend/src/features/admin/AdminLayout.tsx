@@ -7,7 +7,8 @@ import {
   List,
   LogOut,
   ChevronLeft,
-  Shield
+  Shield,
+  Users
 } from 'lucide-react';
 import { api } from '../../lib/api';
 
@@ -33,6 +34,7 @@ export default function AdminLayout() {
 
   const navItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: Settings },
+    ...(user.role === 'ADMIN' ? [{ name: 'Student Management', href: '/admin/students', icon: Users }] : []),
     { name: 'Upload Notice', href: '/admin/notices/upload', icon: Upload },
     { name: 'Manage Notices', href: '/admin/notices', icon: FileText },
     { name: 'Manage Events', href: '/admin/events', icon: List },

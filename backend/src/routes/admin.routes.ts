@@ -33,4 +33,8 @@ router.post('/events/:id/publish', requireRole(['ADMIN', 'FACULTY']), AdminContr
 // Audit Logs - Strictly ADMIN only
 router.get('/audit', requireRole(['ADMIN']), AdminController.getAuditLogs);
 
+// Student Management - Strictly ADMIN only
+router.get('/students', requireRole(['ADMIN']), AdminController.getStudents);
+router.post('/students', requireRole(['ADMIN']), AdminController.createStudent);
+
 export default router;

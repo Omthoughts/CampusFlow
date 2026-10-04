@@ -16,6 +16,7 @@ import AdminNoticesList from '../features/admin/AdminNoticesList';
 import AdminEventsList from '../features/admin/AdminEventsList';
 import AdminAuditLogs from '../features/admin/AdminAuditLogs';
 import AdminLogin from '../features/admin/AdminLogin';
+import AdminStudentManagement from '../features/admin/AdminStudentManagement';
 import CalendarView from '../features/calendar/CalendarView';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 
@@ -56,6 +57,14 @@ export const router = createBrowserRouter([
       {
         path: 'notices/:id/review',
         element: <NoticeReview />,
+      },
+      {
+        path: 'students',
+        element: (
+          <RoleGuard allowedRoles={['ADMIN']} fallbackPath="/admin/dashboard">
+            <AdminStudentManagement />
+          </RoleGuard>
+        ),
       },
       {
         path: 'events',
